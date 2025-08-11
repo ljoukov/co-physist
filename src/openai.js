@@ -58,15 +58,40 @@ export const getCompletion = async (prompt) => {
   }
 
   try {
+    const model = "gpt-5";
     const filesSummary = getOutputFilesSummary();
-    const response = await openai.completions.create({
-      model: "gpt-5",
-      prompt: `You are Co-Physicist, an AI assistant specialized in helping with physics, mathematics, and scientific research. Provide clear, accurate, and helpful responses.\n\nThis is what the agent has produced so far in the output directory:\n${filesSummary}\n\nUser: ${prompt}\nAI:`,
-      max_tokens: 2000,
-      temperature: 0.7,
+    const response = await openai.responses.create({
+      model,
+      input: [
+        'You are Co-Physicist, an AI assistant specialized in helping with physics, mathematics, and scientific research.',
+        'Provide clear, accurate, and helpful responses.',
+        `You are using ${model} large language model.`,
+        '',
+        `This is what the agent has produced so far in the output directory:\n${filesSummary}`,
+        '',
+        `User: ${prompt}`,
+      ].join('\n'),
+      max_output_tokens: 9192,
     });
 
-    return response.choices[0].text.trim();
+    // Prefer SDK helper if available
+    if (response && typeof response.output_text === "string") {
+      return response.output_text.trim();
+    }
+
+    // Fallback: attempt to join text parts from structured output
+    if (response && Array.isArray(response.output)) {
+      const text = response.output
+        .flatMap((item) => (item?.content ?? []))
+        .filter((part) => part?.type === "output_text" || part?.type === "text")
+        .map((part) => part?.text ?? "")
+        .join("")
+        .trim();
+      if (text) return text;
+    }
+
+    // Last resort: stringify
+    return JSON.stringify(response);
   } catch (error) {
     if (error.status === 401) {
       throw new Error(
