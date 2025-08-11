@@ -1,3 +1,4 @@
+# Modal app for running the Poisson solver
 import modal
 
 app = modal.App("co-physist-poisson")
