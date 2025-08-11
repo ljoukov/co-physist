@@ -1,44 +1,65 @@
 #!/usr/bin/env python3
 """
-Factorial calculator
+factorial.py — compute the factorial of a non-negative integer.
 
 Usage:
-  python factorial.py 5
-  # prints: 120
+  python factorial.py 5          # prints 120
+  python factorial.py            # prompts for an integer, then prints result
 
 Notes:
-- Accepts a single non-negative integer n and prints n!.
-- Uses an iterative implementation (no recursion) and supports arbitrarily large n (limited by memory/time).
+- Uses Python's built-in big integers; very large results are supported (memory permitting).
+- Exits with code 1 on invalid input.
 """
 
+from __future__ import annotations
 import argparse
-from typing import Any
+import math
+import sys
 
 
-def factorial(n: int) -> int:
-    """Return n! for a non-negative integer n.
-
-    Raises ValueError if n < 0.
-    """
+def parse_nonnegative_int(s: str) -> int:
+    try:
+        n = int(s, 10)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"Invalid integer: {s!r}")
     if n < 0:
-        raise ValueError("n must be a non-negative integer")
-    result = 1
-    # Iterative multiply to avoid recursion depth issues
-    for k in range(2, n + 1):
-        result *= k
-    return result
+        raise argparse.ArgumentTypeError("Input must be a non-negative integer")
+    return n
 
 
-def main(argv: list[str] | None = None) -> Any:
-    parser = argparse.ArgumentParser(description="Compute n! for a non-negative integer n")
-    parser.add_argument("n", type=int, help="non-negative integer")
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Compute factorial of a non-negative integer")
+    parser.add_argument(
+        "n",
+        nargs="?",
+        type=parse_nonnegative_int,
+        help="non-negative integer (if omitted, will be prompted)",
+    )
     args = parser.parse_args(argv)
 
-    if args.n < 0:
-        parser.error("n must be non-negative")
+    if args.n is None:
+        try:
+            user_in = input("Enter a non-negative integer: ").strip()
+        except EOFError:
+            print("No input provided", file=sys.stderr)
+            return 1
+        try:
+            n = parse_nonnegative_int(user_in)
+        except argparse.ArgumentTypeError as e:
+            print(str(e), file=sys.stderr)
+            return 1
+    else:
+        n = args.n
 
-    print(factorial(args.n))
+    try:
+        result = math.factorial(n)
+    except (OverflowError, ValueError) as e:
+        print(f"Error computing factorial: {e}", file=sys.stderr)
+        return 1
+
+    print(result)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
