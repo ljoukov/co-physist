@@ -2,7 +2,7 @@
 
 AI co-Physicist: run powerful physics tools to drive cutting edge research
 
-<img width="852" height="437" alt="image" src="https://github.com/user-attachments/assets/ed127dab-11d2-4e06-ace8-a671891d07cb" />
+<img width="1397" height="790" alt="image" src="https://github.com/user-attachments/assets/ff8d5a28-d214-44b0-8fb3-f99f82de364a" />
 
 ## How it works
 
